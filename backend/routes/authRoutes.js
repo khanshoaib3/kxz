@@ -4,8 +4,10 @@ const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
+const auth = require("../middlewares/auth");
 
 // Should definitely be changed as this is supposed to be private
+// should also match the one in ./middlewares/auth.js
 const JWT_KEY = "the_definition_of_insanity";
 
 /* Note: Following routes are prefixed with `/auth` */
@@ -40,7 +42,7 @@ router.post("/signup", async (req, res) => {
     });
 
     const savedUser = await user.save();
-    res.json({text: "User created successfully!"});
+    res.json({ text: "User created successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -72,10 +74,23 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-router.delete("/delete", (req, res) => {
-  console.log("yolo");
+router.delete("/delete", auth, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: "Please enter the password -_-" });
+    }
 
-  res.send("<h1>Auth routes</h1>");
+    const user = await User.findById(req.user_id);
+    if (!user) {
+      return res.status(400).send({ error: "Can't find the user!" });
+    }
+
+    const token = await User.deleteOne({ _id: req.user_id });
+    res.json({ text: "User deleted successfully!" });
+} catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Logout should be done at front-end
