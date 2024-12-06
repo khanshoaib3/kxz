@@ -1,5 +1,6 @@
 const express = require("express");
 const formidable = require("express-formidable");
+let db = require("./db")
 
 /********** App Settings **********/
 const app = express();
@@ -12,13 +13,13 @@ app.use(formidable());
 /**********************************/
 
 
+
+/*********** Routes ***********/
 const authRoutes = require('./routes/authRoutes');
 const catRoutes = require('./routes/catRoutes');
 const imgRoutes = require('./routes/imgRoutes');
 
 
-
-/*********** Routes ***********/
 // Authentication Routes (extended)
 app.use("/auth", authRoutes);
 
