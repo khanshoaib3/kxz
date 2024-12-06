@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
+
+// Should definitely be changed as this is supposed to be private
+const JWT_KEY = "the_definition_of_insanity";
 
 /* Note: Following routes are prefixed with `/auth` */
 // Ref(Authentication with MERN Stack): https://namanrivaan.medium.com/authentication-with-mern-stack-9a4dbcd2290d
@@ -36,22 +40,36 @@ router.post("/signup", async (req, res) => {
     });
 
     const savedUser = await user.save();
-    res.json(savedUser);
+    res.json({text: "User created successfully!"});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/signin", (req, res) => {
-  console.log("yolo");
+router.post("/signin", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Please enter all the fields -_-" });
+    }
 
-  res.send("<h1>Auth routes</h1>");
-});
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res
+        .status(400)
+        .send({ error: "User with this username does not exist" });
+    }
 
-router.get("/logout", (req, res) => {
-  console.log("yolo");
+    const isMatch = await bcryptjs.compare(password, user.password);
 
-  res.send("<h1>Auth routes</h1>");
+    if (!isMatch) {
+      return res.status(400).send({ error: "Incorrect password :(" });
+    }
+    const token = jwt.sign({ id: user._id }, JWT_KEY);
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.delete("/delete", (req, res) => {
@@ -59,5 +77,7 @@ router.delete("/delete", (req, res) => {
 
   res.send("<h1>Auth routes</h1>");
 });
+
+// Logout should be done at front-end
 
 module.exports = router;
