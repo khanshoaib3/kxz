@@ -1,15 +1,16 @@
 const express = require("express");
-const formidable = require("express-formidable");
+const app = express();
+const cors = require('cors')
 let db = require("./db")
 
 /********** App Settings **********/
-const app = express();
 const HOST = "localhost";
 const PORT = 3000;
 
 app.set("view engine", "ejs");
 app.use(express.static("./public"));
-app.use(formidable());
+app.use(express.json()); // Parses req.body content (in json) to javascript object
+app.use(cors());
 /**********************************/
 
 
