@@ -12,10 +12,21 @@ app.use(formidable());
 /**********************************/
 
 
+const authRoutes = require('./routes/authRoutes');
+const catRoutes = require('./routes/catRoutes');
+const imgRoutes = require('./routes/imgRoutes');
+
+
 
 /*********** Routes ***********/
-// Extended Routes
-// app.use("/emp", empRoutes);
+// Authentication Routes (extended)
+app.use("/auth", authRoutes);
+
+// Image Category Routes (extended)
+app.use("/category", catRoutes);
+
+// Image Routes (extended)
+app.use("/image", imgRoutes);
 
 // Home Routes
 app.get("/", (req, res) => {
