@@ -1,3 +1,5 @@
+// Ref(Authentication with MERN Stack): https://namanrivaan.medium.com/authentication-with-mern-stack-9a4dbcd2290d
+
 const express = require("express");
 const router = express.Router();
 const bcryptjs = require("bcryptjs");
@@ -10,13 +12,24 @@ const auth = require("../middlewares/auth");
 // should also match the one in ./middlewares/auth.js
 const JWT_KEY = "the_definition_of_insanity";
 
-/* Note: Following routes are prefixed with `/auth` */
-// Ref(Authentication with MERN Stack): https://namanrivaan.medium.com/authentication-with-mern-stack-9a4dbcd2290d
+/* Note: Following routes are prefixed with `/auth/` */
+
+router.get("/info", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user_id);
+    if (!user) {
+      return res.status(400).send({ error: "Can't find the user!" });
+    }
+
+    res.json({ username: user.username, name: user.name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 router.post("/signup", async (req, res) => {
   try {
     const { username, password, confirm_password, name } = req.body;
-    console.log(req.body);
     if (!username || !password || !confirm_password || !name) {
       return res.status(400).json({ error: "Please enter all the fields -_-" });
     }
@@ -88,7 +101,33 @@ router.delete("/delete", auth, async (req, res) => {
 
     const token = await User.deleteOne({ _id: req.user_id });
     res.json({ text: "User deleted successfully!" });
-} catch (err) {
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/is-token-valid", async (req, res) => {
+  try {
+    const token = req.header("x-auth-token");
+    if (!token) {
+      // No token found
+      return res.json(false);
+    }
+
+    const verified = jwt.verify(token, JWT_KEY);
+    if (!verified) {
+      // Invalid token (verification failed by jwt)
+      return res.json(false);
+    }
+
+    const user = await User.findById(verified.id);
+    if (!user) {
+      // Invalid token (user not found)
+      return res.json(false);
+    }
+
+    return res.json(true);
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
