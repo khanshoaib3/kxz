@@ -55,7 +55,7 @@ router.post("/signup", async (req, res) => {
       role: "user",
     });
 
-    const savedUser = await user.save();
+    await user.save();
     res.json({ text: "User created successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -100,7 +100,7 @@ router.delete("/delete", auth, async (req, res) => {
       return res.status(400).send({ error: "Can't find the user!" });
     }
 
-    const token = await User.deleteOne({ _id: req.user_id });
+    await User.deleteOne({ _id: req.user_id });
     res.json({ text: "User deleted successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });

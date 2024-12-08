@@ -1,3 +1,5 @@
+const User = require("../models/userModel")
+
 // Use this middleware in any route that requires a user
 const admin = async (req, res, next) => {
   try {
