@@ -6,6 +6,7 @@ let user = mongoose.Schema({
   name: String,
   password: String,
   joining: { type: Date, default: Date.now },
+  role: String,
 });
 
 const UserModel = mongoose.model("Users", user);

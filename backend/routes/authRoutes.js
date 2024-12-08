@@ -21,7 +21,7 @@ router.get("/info", auth, async (req, res) => {
       return res.status(400).send({ error: "Can't find the user!" });
     }
 
-    res.json({ username: user.username, name: user.name });
+    res.json({ username: user.username, name: user.name, role: user.role });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -52,6 +52,7 @@ router.post("/signup", async (req, res) => {
       username,
       password: hashedPassword,
       name,
+      role: "user",
     });
 
     const savedUser = await user.save();
@@ -127,6 +128,52 @@ router.post("/is-token-valid", async (req, res) => {
     }
 
     return res.json(true);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/is-member", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user_id);
+    if (!user) {
+      return res.status(400).send({ error: "Can't find the user!" });
+    }
+
+    if (user.role === "member") return res.json(true);
+
+    res.json(false);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/is-admin", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user_id);
+    if (!user) {
+      return res.status(400).send({ error: "Can't find the user!" });
+    }
+
+    if (user.role === "admin") return res.json(true);
+
+    res.json(false);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/is-admin-or-member", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user_id);
+    if (!user) {
+      return res.status(400).send({ error: "Can't find the user!" });
+    }
+
+    if (user.role === "member") return res.json(true);
+    if (user.role === "admin") return res.json(true);
+
+    res.json(false);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
